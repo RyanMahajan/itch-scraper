@@ -1,4 +1,5 @@
 import requests
+import re
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from html.parser import HTMLParser
@@ -43,10 +44,14 @@ def get_my_money(url):
     submissions_due = parser.matches["submissions due in"]
 
     if money_found and not jam_over and not submissions_due:
-        print("Url Link:", url)
-        print("--- Context ---")
-        print(money_found)
-        print("---------------")
+        print("\n" + "="*60)
+        print(f"🎯  Possible Match Found at: \033[94m{url}\033[0m")
+        print("-" * 60)
+        print(f"💬  Context:", highlight_dollar(money_found))
+        print("="*60 + "\n")
+
+def highlight_dollar(text):
+    return re.sub(r'(\$[\w.,+-]*)', r'\033[92m\1\033[0m', text)
 
 if __name__ == "__main__":
     target_url = "https://itch.io/jams"
