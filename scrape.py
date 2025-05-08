@@ -34,24 +34,34 @@ def get_all_links(url):
         return set()
 
 def get_my_money(url):
-    search_terms = ["$", "This jam is over.", "Submissions due in"]
+    white_list = ["$", "USD"]
+    black_list = ["This jam is over.", "This jam is now over.", "Submissions due in"]
+    search_terms = white_list + black_list
     response = requests.get(url)
     parser = MultiSearchParser(search_terms)
     parser.feed(response.text)
 
-    money_found = parser.matches["$"]
-    jam_over = parser.matches["this jam is over."]
-    submissions_due = parser.matches["submissions due in"]
+    do_print = False
+    for item in black_list:
+        if parser.matches[item.lower()]:
+            return
 
-    if money_found and not jam_over and not submissions_due:
+    for item in white_list:
+        if parser.matches[item.lower()]:
+            do_print = parser.matches[item.lower()]
+
+    if do_print:
         print("\n" + "="*60)
         print(f"🎯  Possible Match Found at: \033[94m{url}\033[0m")
         print("-" * 60)
-        print(f"💬  Context:", highlight_dollar(money_found))
+        print(f"💬  Context:", highlight_phrases(do_print, white_list))
         print("="*60 + "\n")
 
-def highlight_dollar(text):
-    return re.sub(r'(\$[\w.,+-]*)', r'\033[92m\1\033[0m', text)
+def highlight_phrases(text, phrases, color="\033[92m", is_regex=False):
+    for phrase in phrases:
+        pattern = phrase if is_regex else re.escape(phrase)
+        text = re.sub(f"({pattern})", rf"{color}\1\033[0m", text, flags=re.IGNORECASE)
+    return text
 
 if __name__ == "__main__":
     target_url = "https://itch.io/jams"
