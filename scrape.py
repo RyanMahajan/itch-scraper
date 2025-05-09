@@ -50,6 +50,9 @@ def get_my_money(url):
         if parser.matches[item.lower()]:
             do_print = parser.matches[item.lower()]
 
+    if do_print and len(do_print) > 200:
+        do_print = False
+
     if do_print:
         print("\n" + "="*60)
         print(f"🎯  Possible Match Found at: \033[94m{url}\033[0m")
